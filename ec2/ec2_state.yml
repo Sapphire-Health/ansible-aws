@@ -1,5 +1,6 @@
 ---
   - name: Manage EC2 instance state
+    hosts: all
     connection: local
     gather_facts: false
     tasks:
