@@ -1,0 +1,13 @@
+---
+  - name: Manage EC2 instance state
+    hosts: "{{ match_host }}"
+    connection: local
+    gather_facts: false
+    tasks:
+      - name: Set instance state
+        amazon.aws.ec2_instance:
+          filters:
+            "tag:Name": "{{ hostvars[inventory_hostname].tags.Name }}"
+          region: "{{ hostvars[inventory_hostname].placement.region }}"
+          state: "{{ state  }}"
+          wait: True
