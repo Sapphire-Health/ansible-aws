@@ -1,4 +1,4 @@
 ---
   collections:
-    - name: amazon.aws.aws_ec2
+    - name: amazon.aws
 ...
