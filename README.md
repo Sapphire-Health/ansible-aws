@@ -19,7 +19,7 @@ ansible-inventory -i inventory.aws_ec2.yml --list --yaml
 
 ## Start All Instances
 ```
-ansible-playbook -i ec2/inventory.aws_ec2.yml -e match_host=all -e state=running ec2/ec2_state.yml
+ansible-playbook -i inventory.aws_ec2.yml -e match_host=all -e state=running ec2/ec2_state.yml
 ```
 
 ### References
