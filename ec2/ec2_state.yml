@@ -1,6 +1,5 @@
 ---
   - name: Manage EC2 instance state
-    hosts: "{{ match_host }}"
     connection: local
     gather_facts: false
     tasks:
