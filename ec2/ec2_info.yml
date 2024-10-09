@@ -1,0 +1,15 @@
+---
+  - name: Get EC2 instance info
+    hosts: all
+    connection: local
+    gather_facts: false
+    tasks:
+      - name: Gather EC2 instance info
+        amazon.aws.ec2_instance_info:
+          filters:
+            "tag:Name": "{{ hostvars[inventory_hostname].tags.Name }}"
+          region: "{{ hostvars[inventory_hostname].placement.region }}"
+        register: ec2_instance
+      - name: Show EC2 instance info
+        ansible.builtin.debug:
+          msg: "{{ ec2_instance.instances[0].tags }}"
