@@ -17,9 +17,14 @@ export AWS_SECRET_ACCESS_KEY=secretaccesskey
 ansible-inventory -i inventory.aws_ec2.yml --list --yaml
 ```
 
+## Get Instance Info
+```
+ansible-playbook -i inventory.aws_ec2.yml --limit _running ec2/ec2_info.yml
+```
+
 ## Start All Instances
 ```
-ansible-playbook -i inventory.aws_ec2.yml -e match_host=all -e state=running ec2/ec2_state.yml
+ansible-playbook -i inventory.aws_ec2.yml --limit _running -e state=running ec2/ec2_state.yml
 ```
 
 ### References
