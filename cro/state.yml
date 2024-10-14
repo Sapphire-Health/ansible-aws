@@ -3,6 +3,7 @@
     hosts: all
     gather_facts: false
     tasks:
+      # add a task to turn on all VMs without waiting
       # loop through route_tables list (names of all route_tables that should be modified)
       - name: Update Route Tables
         ansible.builtin.include_tasks:
