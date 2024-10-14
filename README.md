@@ -17,6 +17,11 @@ export AWS_SECRET_ACCESS_KEY=secretaccesskey
 ansible-inventory -i inventory.aws_ec2.yml --list --yaml
 ```
 
+## Provision Ansible host
+```
+ansible-playbook -i ansible_vm.yml --limit=ansible provision/ansible_vm.yml --become
+```
+
 ## Get Instance Info
 ```
 ansible-playbook -i inventory.aws_ec2.yml --limit _running ec2/ec2_info.yml
@@ -25,6 +30,21 @@ ansible-playbook -i inventory.aws_ec2.yml --limit _running ec2/ec2_info.yml
 ## Start All Instances
 ```
 ansible-playbook -i inventory.aws_ec2.yml --limit _running -e state=running ec2/ec2_state.yml
+```
+
+## Get Route Info
+```
+ansible-playbook -e region=us-east-2 route/route_info.yml
+```
+
+## Get Transit Gateway Info
+```
+ansible-playbook -e region=us-east-2 transit_gateway/transit_gateway_info.yml
+```
+
+## Activate/Deactivate CRO
+```
+ansible-playbook -i inventory.aws_ec2.yml --limit '_stopped:&EPIC-AWS-HSW*' -e @vars.yml cro/state.yml
 ```
 
 ### References
