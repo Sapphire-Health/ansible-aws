@@ -1,0 +1,14 @@
+---
+  - name: Activate/Deactivate CRO
+    hosts: all
+    gather_facts: false
+    tasks:
+      # loop through route_tables list (names of all route_tables that should be modified)
+      - name: Update Route Tables
+        ansible.builtin.include_tasks:
+          file: update_routes.yml
+        run_once: true
+        loop: "{{ route_tables }}"
+        loop_control:
+          loop_var: route_table
+          index_var: route_index

@@ -1,0 +1,51 @@
+# Get route info from route_tables 
+- name: Get existing routes
+  amazon.aws.ec2_vpc_route_table_info:
+    region: "{{ region }}"
+    filters:
+      "tag:Name": "{{ route_table }}"
+  register: route_table_info
+  delegate_to: localhost
+- name: Show Route
+  ansible.builtin.debug:
+    msg: "{{ route_table_info }}"
+  delegate_to: localhost
+# get routes excluding the 0.0.0.0/0 route if it exists and the built-in local route
+- name: Get routes excluding the 0.0.0.0/0 route if it exists and the built-in local route
+  set_fact:
+    routes: "{{ routes | d([]) + [{ 'dest': _block, _key: _gateway }] }}"
+  vars:
+    _block: "{{ item.destination_cidr_block if item.destination_cidr_block != None else item.destination_ipv6_cidr_block }}"
+    _gateway: "{{ item.gateway_id if item.gateway_id != None else (item.transit_gateway_id if item.transit_gateway_id != None else item.instance_id) }}"
+    _key: "{{ 'gateway_id' if item.gateway_id != None else ('gateway_id' if item.transit_gateway_id != None else 'instance_id') }}"          
+  loop: "{{ route_table_info.route_tables[0].routes }}"
+  when: item.gateway_id != 'local' and item.destination_cidr_block != '0.0.0.0/0'
+  delegate_to: localhost
+# if activating CRO, include the 0.0.0.0/0 route to the internet gateway 
+- name: Add the 0.0.0.0/0 route to the internet gateway 
+  set_fact:
+    routes: "{{ routes | d([]) + [{ 'dest': '0.0.0.0/0', 'gateway_id': 'igw' }] }}"          
+  when: action == "activate"
+- name: Show Route
+  ansible.builtin.debug:
+    msg: "{{ routes }}"
+  delegate_to: localhost
+- name: Update routes
+  amazon.aws.ec2_vpc_route_table:
+    region: "{{ region }}"
+    vpc_id: "{{ route_table_info.route_tables[0].vpc_id }}"
+    route_table_id: "{{ route_table_info.route_tables[0].route_table_id }}"
+    lookup: id
+    state: present
+    routes: "{{ routes }}"
+  register: route_change
+  delegate_to: localhost
+- name: Show result
+  ansible.builtin.debug:
+    msg: "{{ route_change }}"
+  delegate_to: localhost
+# Reset routes fact to prevent all routes from being appended into a single array
+- name: Reset routes fact to prevent all routes from being appended into a single array
+  set_fact:
+    routes: []
+  delegate_to: localhost
