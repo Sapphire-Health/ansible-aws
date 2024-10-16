@@ -77,7 +77,6 @@
           state: latest
         loop:
           - lvm2
-          - amazon-ec2-utils
         become: true
       # - name: Provision storage
       #   ansible.builtin.include_role:
