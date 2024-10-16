@@ -78,9 +78,11 @@
         loop:
           - lvm2
         become: true
-      # - name: Provision storage
-      #   ansible.builtin.include_role:
-      #     name: linux-system-roles.storage
+      - name: Provision storage
+        ansible.builtin.include_role:
+          name: linux-system-roles.storage
+        vars:
+          ansible_become: yes
       # - name: Update storage_layout fact with storage disk paths
       #   ansible.utils.update_fact:
       #     storage_pool
