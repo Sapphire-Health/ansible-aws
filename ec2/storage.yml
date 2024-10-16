@@ -50,9 +50,9 @@
       - name: Get storage pools to path list mapping
         ansible.builtin.set_fact:
           #sp_path_mapping: "{{ sp_path_mapping | default({}) | combine({storage_pool.name: pathlist}) }}"
-          storage_layout: "{{ storage_layout + pool}}"
+          storage_pools: "{{ storage_pools + pool}}"
         vars:
-          storage_layout: []
+          storage_pools: []
           pool:
             - name: "{{ storage_pool.name }}"
               volumes: "{{ storage_pool.volumes }}"
@@ -63,13 +63,13 @@
                 {%- endfor -%}
                 {{ disks }}
         delegate_to: localhost
-        loop: "{{ storage_pools }}"
+        loop: "{{ storage_layout }}"
         loop_control:
           loop_var: storage_pool
           index_var: storage_pool_index
       - name: Show storage layout
         ansible.builtin.debug:
-          msg: "{{ storage_layout }}"
+          msg: "{{ storage_pools }}"
         delegate_to: localhost
       - name: Install ansible and other dependencies
         ansible.builtin.dnf:
@@ -83,11 +83,11 @@
           name: linux-system-roles.storage
         vars:
           ansible_become: yes
-      # - name: Update storage_layout fact with storage disk paths
+      # - name: Update storage_pools fact with storage disk paths
       #   ansible.utils.update_fact:
       #     storage_pool
       #   vars:
-      #     storage_layout: []
+      #     storage_pools: []
       #   loop: "{{ storage_pools }}"
       #   loop_control:
       #     loop_var: storage_pool
