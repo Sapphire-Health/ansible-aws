@@ -1,0 +1,66 @@
+---
+  - name: Get route info
+    hosts: all
+    vars:
+      collections:
+        - amazon.aws
+        - community.aws
+      roles:
+        - linux-system-roles.storage
+    tasks:
+      # - name: debug
+      #   ansible.builtin.debug:
+      #     var: "{{ hostvars[groups['all'][0]] }}"
+      - name: Install all updates
+        ansible.builtin.apt:
+          name: "*"
+          cache_valid_time: 3600
+          update_cache: true
+          state: latest
+      - name: Install dependencies
+        ansible.builtin.apt:
+          pkg:
+            - software-properties-common
+      - name: Add Ansible Repository
+        ansible.builtin.apt_repository:
+          repo: ppa:ansible/ansible
+          state: present
+      - name: Install Ansible
+        ansible.builtin.apt:
+          update_cache: true
+          pkg:
+            - ansible
+            - git
+            - python3-boto3
+      - name: Install collections
+        community.general.ansible_galaxy_install:
+          type: collection
+          name: "{{ item }}"
+        loop: "{{ collections }}"
+      - name: Install roles
+        community.general.ansible_galaxy_install:
+          type: role
+          name: "{{ item }}"
+        loop: "{{ roles }}"
+      - name: Create users
+        ansible.builtin.user:
+          name: "{{ item.name }}"
+          create_home: "{{ item.create_home }}"
+          shell: "{{ item.shell }}"
+          groups: "{{ item.groups }}"
+          append: "{{ item.append }}"
+        loop: "{{ users }}"
+      - name: Set authorized keys
+        ansible.posix.authorized_key:
+          user: "{{ item.name }}"
+          state: present
+          key: "{{ item.ssh_public_key }}"
+        loop: "{{ users }}"
+      - name: Allow users to sudo without password
+        ansible.builtin.template:
+          src: sudoers.j2
+          dest: /etc/sudoers.d/{{ item.name }}
+          owner: root
+          group: root
+          mode: 0400
+        loop: "{{ users }}"
