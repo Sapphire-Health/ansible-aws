@@ -1,0 +1,101 @@
+---
+  - name: Get storage info
+    hosts: all
+    connection: local
+    #gather_facts: true
+    tasks:
+      - name: Get EC2 instance info
+        amazon.aws.ec2_instance_info:
+          filters:
+            "tag:Name": "{{ inventory_hostname }}"
+            instance-state-name: ["running"]
+          region: "{{ region }}"
+        register: ec2_instance
+        delegate_to: localhost
+      - name: Show EC2 instance info
+        ansible.builtin.debug:
+          msg: "{{ ec2_instance.instances[0].instance_id }}"
+      - name: Make sure one instance was returned
+        ansible.builtin.fail:
+          msg: "No instance found for {{ inventory_hostname }}"
+        when: ec2_instance.instances | length == 0 or ec2_instance.instances | length > 1
+        delegate_to: localhost
+      - name: Show EC2 volume info
+        ansible.builtin.debug:
+          msg: "{{ inventory_hostname }}"
+        delegate_to: localhost
+      - name: Gather EC2 volume info
+        amazon.aws.ec2_vol_info:
+          filters:
+            attachment.instance_id: "{{ ec2_instance.instances[0].instance_id }}"
+          region: "{{ region }}"
+        register: ec2_vol_info
+        delegate_to: localhost
+      - name: Show EC2 volume info
+        ansible.builtin.debug:
+          msg: "{{ ec2_vol_info }}"
+        delegate_to: localhost
+      - name: Get volume name to id mapping
+        ansible.builtin.set_fact:
+          vol_name_to_id: "{{ vol_name_to_id | default({}) | combine({item.tags.Name: volpath}) }}"
+        vars:
+          volpath: "/dev/disk/by-id/nvme-Amazon_Elastic_Block_Store_{{ item.id|replace('-', '') }}"
+        delegate_to: localhost
+        when: item.tags.Name is defined
+        loop: "{{ ec2_vol_info.volumes }}"
+      - name: Get volume name to id mapping
+        ansible.builtin.debug:
+          msg: "{{ vol_name_to_id }}"
+        delegate_to: localhost
+      - name: Get storage pools to path list mapping
+        ansible.builtin.set_fact:
+          #sp_path_mapping: "{{ sp_path_mapping | default({}) | combine({storage_pool.name: pathlist}) }}"
+          storage_layout: "{{ storage_layout + pool}}"
+        vars:
+          storage_layout: []
+          pool:
+            - name: "{{ storage_pool.name }}"
+              volumes: "{{ storage_pool.volumes }}"
+              disks: >-
+                {%- set disks = [] -%}
+                  {%- for disk in storage_pool.disks -%}
+                  {%- set disks = disks.append(vol_name_to_id[disk]) -%}
+                {%- endfor -%}
+                {{ disks }}
+        delegate_to: localhost
+        loop: "{{ storage_pools }}"
+        loop_control:
+          loop_var: storage_pool
+          index_var: storage_pool_index
+      - name: Show storage layout
+        ansible.builtin.debug:
+          msg: "{{ storage_layout }}"
+        delegate_to: localhost
+      - name: Install ansible and other dependencies
+        ansible.builtin.dnf:
+          name: "{{ item }}"
+          state: latest
+        loop:
+          - lvm2
+          - amazon-ec2-utils
+      # - name: Provision storage
+      #   ansible.builtin.include_role:
+      #     name: linux-system-roles.storage
+      # - name: Update storage_layout fact with storage disk paths
+      #   ansible.utils.update_fact:
+      #     storage_pool
+      #   vars:
+      #     storage_layout: []
+      #   loop: "{{ storage_pools }}"
+      #   loop_control:
+      #     loop_var: storage_pool
+      #     index_var: storage_pool_index
+      # - name: Install package with Yum
+      #   ansible.builtin.dnf:
+      #     name: amazon-ec2-utils
+      #     use_backend: dnf4
+      #     state: present
+      # - name: Show host facts
+      #   ansible.builtin.debug:
+      #     var: hostvars[inventory_hostname]
+      #   delegate_to: localhost
