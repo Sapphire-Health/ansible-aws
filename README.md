@@ -3,6 +3,7 @@
 ## Install Prerequisites
 ```
 ansible-galaxy collection install -r collections/requirements.yml
+ansible-galaxy role install -r role/requirements.yml
 pip3 install botocore boto3
 ```
 
@@ -42,10 +43,17 @@ ansible-playbook -e region=us-east-2 route/route_info.yml
 ansible-playbook -e region=us-east-2 transit_gateway/transit_gateway_info.yml
 ```
 
+## Provision ODB Storage
+```
+ansible-playbook -i ansible_vm.yml --limit=tstodb ec2/storage.yml
+```
+
 ## Activate/Deactivate CRO
 ```
 ansible-playbook -i inventory.aws_ec2.yml --limit '_stopped:&EPIC-AWS-HSW*' -e @vars.yml cro/state.yml
 ```
+
+ebsnvme-id -v /dev/nvme0n1
 
 ### References
 https://docs.ansible.com/ansible/latest/collections/amazon/aws/aws_ec2_inventory.html
