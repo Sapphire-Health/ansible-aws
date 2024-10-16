@@ -3,7 +3,7 @@
 ## Install Prerequisites
 ```
 ansible-galaxy collection install -r collections/requirements.yml
-ansible-galaxy role install -r role/requirements.yml
+ansible-galaxy role install -r roles/requirements.yml
 pip3 install botocore boto3
 ```
 
