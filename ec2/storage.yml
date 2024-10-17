@@ -9,7 +9,7 @@
       - name: Include vars of stuff.yaml into the 'stuff' variable (2.2).
         ansible.builtin.include_vars:
           file: ../host_vars/{{ inventory_hostname }}.yml
-          name: storage
+          name: customhostvars
       - name: Get EC2 instance info
         amazon.aws.ec2_instance_info:
           filters:
@@ -89,7 +89,7 @@
                 {%- endfor -%}
                 {{ disks }}
         delegate_to: localhost
-        loop: "{{ storage.storage_layout }}"
+        loop: "{{ customhostvars.storage_layout }}"
         loop_control:
           loop_var: storage_pool
           index_var: storage_pool_index

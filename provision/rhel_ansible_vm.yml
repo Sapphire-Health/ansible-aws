@@ -14,6 +14,10 @@
       # - name: debug
       #   ansible.builtin.debug:
       #     var: "{{ hostvars[groups['all'][0]] }}"
+      - name: Include vars of stuff.yaml into the 'stuff' variable (2.2).
+        ansible.builtin.include_vars:
+          file: ../host_vars/{{ inventory_hostname }}.yml
+          name: customhostvars
       - name: Install ansible and other dependencies
         ansible.builtin.dnf:
           name: "{{ item }}"
@@ -46,13 +50,13 @@
           shell: "{{ item.shell }}"
           #groups: "{{ item.groups }}"
           #append: "{{ item.append }}"
-        loop: "{{ users }}"
+        loop: "{{ customhostvars.users }}"
       - name: Set authorized keys
         ansible.posix.authorized_key:
           user: "{{ item.name }}"
           state: present
           key: "{{ item.ssh_public_key }}"
-        loop: "{{ users }}"
+        loop: "{{ customhostvars.users }}"
       - name: Allow users to sudo without password
         ansible.builtin.template:
           src: sudoers.j2
@@ -60,4 +64,4 @@
           owner: root
           group: root
           mode: 0400
-        loop: "{{ users }}"
+        loop: "{{ customhostvars.users }}"
