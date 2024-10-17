@@ -25,7 +25,7 @@ ansible -m ping -e @vars/default.yml -i inventory.aws_ec2.yml al
 
 ## Provision Ansible host
 ```
-ansible-playbook -i ansible_vm.yml --limit=ansible provision/ansible_vm.yml --become
+ansible-playbook -i inventory.aws_ec2.yml --limit=ansible01 provision/rhel_ansible_vm.yml --become
 ```
 
 ## Get Instance Info
@@ -50,7 +50,7 @@ ansible-playbook -e region=us-east-2 transit_gateway/transit_gateway_info.yml
 
 ## Provision ODB Storage
 ```
-ansible-playbook -i ansible_vm.yml --limit=tstodb ec2/storage.yml
+ansible-playbook -i inventory.aws_ec2.yml --limit=tstodb:prdodb ec2/storage.yml
 ```
 
 ## Activate/Deactivate CRO
