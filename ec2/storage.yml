@@ -1,15 +1,21 @@
 ---
   - name: Get storage info
     hosts: all
+    vars_files:
+      - ../vars/default.yml
     #connection: local
     #gather_facts: true
     tasks:
+      - name: Include vars of stuff.yaml into the 'stuff' variable (2.2).
+        ansible.builtin.include_vars:
+          file: ../host_vars/{{ inventory_hostname }}.yml
+          name: storage
       - name: Get EC2 instance info
         amazon.aws.ec2_instance_info:
           filters:
             "tag:Name": "{{ inventory_hostname }}"
             instance-state-name: ["running"]
-          region: "{{ region }}"
+          region: "{{ hostvars[inventory_hostname].placement.region }}"
         register: ec2_instance
         delegate_to: localhost
       - name: Show EC2 instance info
@@ -29,7 +35,7 @@
         amazon.aws.ec2_vol_info:
           filters:
             attachment.instance_id: "{{ ec2_instance.instances[0].instance_id }}"
-          region: "{{ region }}"
+          region: "{{ hostvars[inventory_hostname].placement.region }}"
         register: ec2_vol_info
         delegate_to: localhost
       - name: Show EC2 volume info
@@ -83,7 +89,7 @@
                 {%- endfor -%}
                 {{ disks }}
         delegate_to: localhost
-        loop: "{{ storage_layout }}"
+        loop: "{{ storage.storage_layout }}"
         loop_control:
           loop_var: storage_pool
           index_var: storage_pool_index
@@ -98,11 +104,11 @@
         loop:
           - lvm2
         become: true
-      - name: Provision storage
-        ansible.builtin.include_role:
-          name: linux-system-roles.storage
-        vars:
-          ansible_become: yes
+      # - name: Provision storage
+      #   ansible.builtin.include_role:
+      #     name: linux-system-roles.storage
+      #   vars:
+      #     ansible_become: yes
       # - name: Update storage_pools fact with storage disk paths
       #   ansible.utils.update_fact:
       #     storage_pool

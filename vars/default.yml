@@ -1,0 +1,11 @@
+#https://www.adainese.it/blog/2022/10/30/ansible-with-bastion-host/
+ansible_user: "{{ tags.User }}"
+ansible_ssh_private_key_file: "~/.ssh/lyas_id_rsa"
+#ansible_ssh_private_key_file: '{{ hostvars["ansible01"]["ansible_ssh_private_key_file"] }}'
+ansible_ssh_common_args: >-
+  -o ProxyCommand="ssh
+  -o IdentityFile=~/.ssh/lyas_id_rsa
+  -o StrictHostKeyChecking=no
+  -o UserKnownHostsFile=/dev/null
+  -W %h:%p
+  -q {{ hostvars["ansible01"]["tags"]["User"] }}@{{ hostvars["ansible01"]["public_ip_address"] }}"

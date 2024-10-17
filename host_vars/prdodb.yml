@@ -1,0 +1,20 @@
+storage_layout:
+- name: app
+  disks:
+    - disk1
+  volumes:
+    - name: shared
+      size: "50g"
+      mount_point: "/mnt/app/shared"
+      #fs_type: xfs
+      state: present
+- name: db
+  disks:
+    - disk3
+    - disk2
+  volumes:
+    - name: users
+      size: "30g"
+      fs_type: ext4
+      state: present
+      mount_point: "/mnt/app/users"

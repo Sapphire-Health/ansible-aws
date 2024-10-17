@@ -18,6 +18,11 @@ export AWS_SECRET_ACCESS_KEY=secretaccesskey
 ansible-inventory -i inventory.aws_ec2.yml --list --yaml
 ```
 
+## Ping Hosts to Check Connectivity
+```
+ansible -m ping -e @vars/default.yml -i inventory.aws_ec2.yml al
+```
+
 ## Provision Ansible host
 ```
 ansible-playbook -i ansible_vm.yml --limit=ansible provision/ansible_vm.yml --become
