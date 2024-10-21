@@ -25,7 +25,7 @@ ansible -m ping -e @vars/default.yml -i inventory.aws_ec2.yml --limit='!_Windows
 
 ## Provision Ansible host
 ```
-ansible-playbook -i inventory.aws_ec2.yml --limit=ansible01 provision/rhel_ansible_vm.yml --become
+ansible-playbook -i inventory.aws_ec2.yml -e @vars/default.yml --limit=ansible01 provision/rhel_ansible_vm.yml
 ```
 
 ## Get Instance Info

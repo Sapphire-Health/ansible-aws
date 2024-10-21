@@ -4,11 +4,11 @@
     vars_files:
       - ../vars/default.yml
     vars:
-      collections:
+      ansible_collections:
         - amazon.aws
         - community.aws
         - ansible.posix
-      roles:
+      ansible_roles:
         - linux-system-roles.storage
     tasks:
       # - name: debug
@@ -27,22 +27,30 @@
           - git
           - rhel-system-roles
           - python3-pip
+          - gcc
+          - python3-devel
+          - krb5-devel
+          - krb5-libs
+          - krb5-workstation
+          - vim
+        become: true
       - name: Install pip python dependencies
         ansible.builtin.pip:
           name: "{{ item }}"
           state: present
         loop:
           - boto3
+          - pywinrm
       - name: Install collections
         community.general.ansible_galaxy_install:
           type: collection
           name: "{{ item }}"
-        loop: "{{ collections }}"
+        loop: "{{ ansible_collections }}"
       - name: Install roles
         community.general.ansible_galaxy_install:
           type: role
           name: "{{ item }}"
-        loop: "{{ roles }}"
+        loop: "{{ ansible_roles }}"
       - name: Create users
         ansible.builtin.user:
           name: "{{ item.name }}"
@@ -51,12 +59,14 @@
           #groups: "{{ item.groups }}"
           #append: "{{ item.append }}"
         loop: "{{ customhostvars.users }}"
+        become: true
       - name: Set authorized keys
         ansible.posix.authorized_key:
           user: "{{ item.name }}"
           state: present
           key: "{{ item.ssh_public_key }}"
         loop: "{{ customhostvars.users }}"
+        become: true
       - name: Allow users to sudo without password
         ansible.builtin.template:
           src: sudoers.j2
@@ -65,3 +75,8 @@
           group: root
           mode: 0400
         loop: "{{ customhostvars.users }}"
+        become: true
+      - name: Git checkout
+        ansible.builtin.git:
+          repo: 'https://github.com/Sapphire-Health/ansible-aws.git'
+          dest: "/home/{{ ansible_user }}/ansible-aws"
