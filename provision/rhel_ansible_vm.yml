@@ -8,6 +8,7 @@
         - amazon.aws
         - community.aws
         - ansible.posix
+        - ansible.windows
       ansible_roles:
         - linux-system-roles.storage
     tasks:
