@@ -25,6 +25,7 @@ ansible -m ping -e @vars/default.yml -i inventory.aws_ec2.yml --limit='!_Windows
 
 ## Ping Windows Hosts to Check Connectivity
 ```
+kinit admin@CRO.UTAH.EDU
 ansible -m win_ping -e @vars/windows.yml -i inventory.aws_ec2.yml --limit='_Windows' all
 ```
 
