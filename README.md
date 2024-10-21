@@ -23,6 +23,11 @@ ansible-inventory -i inventory.aws_ec2.yml --list --yaml
 ansible -m ping -e @vars/default.yml -i inventory.aws_ec2.yml --limit='!_Windows' all
 ```
 
+## Ping Windows Hosts to Check Connectivity
+```
+ansible -m ping -e @vars/windows.yml -i inventory.aws_ec2.yml --limit='_Windows' all
+```
+
 ## Provision Ansible host
 ```
 ansible-playbook -i inventory.aws_ec2.yml -e @vars/default.yml --limit=ansible01 provision/rhel_ansible_vm.yml
