@@ -1,4 +1,5 @@
 ansible_user: "admin@CRO.UTAH.EDU"
+ansible_host: "{{ inventory_hostname }}.cro.utah.edu"
 ansible_connection: winrm
 ansible_winrm_transport: kerberos
 ansible_winrm_server_cert_validation: ignore
