@@ -59,6 +59,11 @@ ansible-playbook -e region=us-east-2 transit_gateway/transit_gateway_info.yml
 ansible-playbook -i inventory.aws_ec2.yml --limit=tstodb:prdodb ec2/storage.yml
 ```
 
+## Provision Windows Storage
+```
+ansible-playbook -i inventory.aws_ec2.yml --limit='_Windows' ec2/windows.yml
+```
+
 ## Activate/Deactivate CRO
 ```
 ansible-playbook -i inventory.aws_ec2.yml --limit '_stopped:&EPIC-AWS-HSW*' -e @vars.yml cro/state.yml
