@@ -8,6 +8,7 @@ hostnames:
   - name: tag:Name
 keyed_groups:
   - key: state.name
+  - key: platform_details
 compose:
   ansible_host: public_ip_address | default(private_ip_address)
   #ansible_host: public_ip_address if tags.Name == "bastion" else private_ip_address
