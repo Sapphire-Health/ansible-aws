@@ -18,7 +18,7 @@
       #     var: "{{ hostvars[groups['all'][0]] }}"
       - name: Include vars of stuff.yaml into the 'stuff' variable (2.2).
         ansible.builtin.include_vars:
-          file: ../host_vars/{{ inventory_hostname }}.yml
+          file: ../host_vars/{{ inventory_hostname_short }}.yml
           name: customhostvars
       - name: Install ansible and other dependencies
         ansible.builtin.dnf:

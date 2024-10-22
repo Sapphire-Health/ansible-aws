@@ -31,7 +31,7 @@ ansible -m win_ping -e @vars/windows.yml -i inventory.aws_ec2.yml --limit='_Wind
 
 ## Provision Ansible host
 ```
-ansible-playbook -i inventory.aws_ec2.yml -e @vars/default.yml --limit=ansible01 provision/rhel_ansible_vm.yml
+ansible-playbook -i inventory.aws_ec2.yml -e @vars/default.yml --limit=ansible01.* provision/rhel_ansible_vm.yml
 ```
 
 ## Get Instance Info
@@ -73,3 +73,11 @@ ebsnvme-id -v /dev/nvme0n1
 
 ### References
 https://docs.ansible.com/ansible/latest/collections/amazon/aws/aws_ec2_inventory.html
+
+## SSH Examples
+```
+ssh ec2-user@52.10.124.182 -i ~/.ssh/lyas_id_rsa
+ssh -o ProxyCommand="ssh -i ~/.ssh/lyas_id_rsa -W %h:%p ec2-user@52.10.124.182" ec2-user@10.197.0.11 -i ~/.ssh/lyas_id_rsa
+ssh -o ProxyCommand="ssh -i ~/.ssh/lyas_id_rsa -W %h:%p ec2-user@52.10.124.182" ec2-user@10.197.0.4 -i ~/.ssh/lyas_id_rsa
+ssh -o ProxyCommand="ssh -i ~/.ssh/lyas_id_rsa -W %h:%p ec2-user@52.10.124.182" ec2-user@10.197.0.36 -i ~/.ssh/lyas_id_rsa
+```
