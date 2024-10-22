@@ -97,7 +97,7 @@
           vol_name: "{{ item.serial_number | split('_') }}"
           ansible_connection: local
         delegate_to: localhost
-        when: item.partition_count == 0
+        #when: item.partition_count == 0
         loop: "{{ windows_disks.ansible_facts.ansible_disks }}"
       - name: Show vol_id_to_disk_id
         ansible.builtin.debug:
@@ -112,21 +112,21 @@
         delegate_to: localhost
         vars:
           ansible_connection: local
-      - name: Partition disks
-        community.windows.win_partition:
+      - name: Initialize disks
+        community.windows.win_initialize_disk :
           disk_number: "{{ vol_id_to_disk_id[vol_name_to_id[item.key]] }}"
           style: gpt
         loop: "{{ customhostvars.volumes | dict2items }}"
-      # - name: Partition disks
-      #   community.windows.win_partition:
-      #     drive_letter: "{{ item.value.letter }}"
-      #     disk_number: "{{ vol_id_to_disk_id[vol_name_to_id[item.key]] }}"
-      #     partition_size: -1
-      #     gpt_type: "basic_data"
-      #   loop: "{{ customhostvars.volumes | dict2items }}"
-      # - name: Partition disks
-      #   community.windows.win_format:
-      #     drive_letter: "{{ item.value.letter }}"
-      #     disk_number: "{{ vol_id_to_disk_id[vol_name_to_id[item.key]] }}"
-      #     new_label: "{{ item.key }}"
-      #   loop: "{{ customhostvars.volumes | dict2items }}"
+      - name: Partition disks
+        community.windows.win_partition:
+          drive_letter: "{{ item.value.letter }}"
+          disk_number: "{{ vol_id_to_disk_id[vol_name_to_id[item.key]] }}"
+          partition_size: -1
+          gpt_type: "basic_data"
+        loop: "{{ customhostvars.volumes | dict2items }}"
+      - name: Format disks
+        community.windows.win_format:
+          drive_letter: "{{ item.value.letter }}"
+          new_label: "{{ item.key }}"
+          file_system: ntfs
+        loop: "{{ customhostvars.volumes | dict2items }}"
