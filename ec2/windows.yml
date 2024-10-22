@@ -6,6 +6,21 @@
     #connection: local
     #gather_facts: true
     tasks:
+      - name: Check if var file exists for host
+        ansible.builtin.stat:
+          path: ../host_vars/{{ inventory_hostname_short }}.yml
+        register: hostvarfile
+        delegate_to: localhost
+        vars:
+          ansible_connection: local
+      - name: Include vars if var file exists for host
+        ansible.builtin.include_vars:
+          file: ../host_vars/{{ inventory_hostname_short }}.yml
+          name: customhostvars
+        delegate_to: localhost
+        when: hostvarfile.stat.exists
+        vars:
+          ansible_connection: local
       - name: Show EC2 volume info
         ansible.builtin.debug:
           msg: "{{ inventory_hostname_short }}"
@@ -44,12 +59,27 @@
         delegate_to: localhost
         vars:
           ansible_connection: local
-      - name: Show EC2 volume info
+      - name: Get volume name to path
+        ansible.builtin.set_fact:
+          vol_name_to_id: "{{ vol_name_to_id | default({}) | combine({item.tags.ansible_key: vol_name}) }}"
+        vars:
+          vol_name: "{{ item.id|replace('-', '') }}"
+          ansible_connection: local
+        delegate_to: localhost
+        when: item.tags
+        loop: "{{ ec2_vol_info.volumes }}"
+      - name: Show vol_name_to_id
         ansible.builtin.debug:
-          msg: "{{ ec2_vol_info }}"
+          msg: "{{ vol_name_to_id }}"
         delegate_to: localhost
         vars:
           ansible_connection: local
+      # - name: Show EC2 volume info
+      #   ansible.builtin.debug:
+      #     msg: "{{ ec2_vol_info }}"
+      #   delegate_to: localhost
+      #   vars:
+      #     ansible_connection: local
       - name: Get disk facts
         community.windows.win_disk_facts:
         register: windows_disks
@@ -60,18 +90,43 @@
       #   delegate_to: localhost
       #   vars:
       #     ansible_connection: local
-      - name: Get volume name to id mapping
+      - name: Get volume id to disk id
         ansible.builtin.set_fact:
-          vol_name_to_path: "{{ vol_name_to_path | default({}) | combine({vol_name[0]: item.path}) }}"
+          vol_id_to_disk_id: "{{ vol_id_to_disk_id | default({}) | combine({vol_name[0]: item.number|int}) }}"
         vars:
           vol_name: "{{ item.serial_number | split('_') }}"
           ansible_connection: local
         delegate_to: localhost
         when: item.partition_count == 0
         loop: "{{ windows_disks.ansible_facts.ansible_disks }}"
-      - name: Show disk information
+      - name: Show vol_id_to_disk_id
         ansible.builtin.debug:
-          msg: "{{ vol_name_to_path }}"
+          msg: "{{ vol_id_to_disk_id }}"
         delegate_to: localhost
         vars:
           ansible_connection: local
+      - name: Show disk information
+        ansible.builtin.debug:
+          msg: "{{ item.key }} - {{ item.value }}"
+        loop: "{{ customhostvars.volumes | dict2items }}"
+        delegate_to: localhost
+        vars:
+          ansible_connection: local
+      - name: Partition disks
+        community.windows.win_partition:
+          disk_number: "{{ vol_id_to_disk_id[vol_name_to_id[item.key]] }}"
+          style: gpt
+        loop: "{{ customhostvars.volumes | dict2items }}"
+      # - name: Partition disks
+      #   community.windows.win_partition:
+      #     drive_letter: "{{ item.value.letter }}"
+      #     disk_number: "{{ vol_id_to_disk_id[vol_name_to_id[item.key]] }}"
+      #     partition_size: -1
+      #     gpt_type: "basic_data"
+      #   loop: "{{ customhostvars.volumes | dict2items }}"
+      # - name: Partition disks
+      #   community.windows.win_format:
+      #     drive_letter: "{{ item.value.letter }}"
+      #     disk_number: "{{ vol_id_to_disk_id[vol_name_to_id[item.key]] }}"
+      #     new_label: "{{ item.key }}"
+      #   loop: "{{ customhostvars.volumes | dict2items }}"
