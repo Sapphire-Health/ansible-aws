@@ -8,12 +8,12 @@
     tasks:
       - name: Show EC2 volume info
         ansible.builtin.debug:
-          msg: "{{ inventory_hostname }}"
+          msg: "{{ inventory_hostname_short }}"
         delegate_to: localhost
       - name: Get EC2 instance info
         amazon.aws.ec2_instance_info:
           filters:
-            "tag:Name": "{{ inventory_hostname }}"
+            "tag:Name": "{{ inventory_hostname_short }}"
             instance-state-name: ["running"]
           region: "{{ hostvars[inventory_hostname].placement.region }}"
         register: ec2_instance
@@ -24,7 +24,7 @@
         delegate_to: localhost
       - name: Make sure one instance was returned
         ansible.builtin.fail:
-          msg: "No instance found for {{ inventory_hostname }}"
+          msg: "No instance found for {{ inventory_hostname_short }}"
         when: ec2_instance.instances | length == 0 or ec2_instance.instances | length > 1
         delegate_to: localhost
       - name: Gather EC2 volume info

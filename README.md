@@ -56,7 +56,7 @@ ansible-playbook -e region=us-east-2 transit_gateway/transit_gateway_info.yml
 
 ## Provision ODB Storage
 ```
-ansible-playbook -i inventory.aws_ec2.yml --limit=tstodb:prdodb ec2/storage.yml
+ansible-playbook -i inventory.aws_ec2.yml --limit=tstodb.*,prdodb.* ec2/storage.yml
 ```
 
 ## Provision Windows Storage
