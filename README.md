@@ -76,7 +76,7 @@ https://docs.ansible.com/ansible/latest/collections/amazon/aws/aws_ec2_inventory
 
 ## SSH Examples
 ```
-ssh ec2-user@52.10.124.182 -i ~/.ssh/lyas_id_rsa
+ssh ec2-user@54.245.75.136 -i ~/.ssh/lyas_id_rsa
 ssh -o ProxyCommand="ssh -i ~/.ssh/lyas_id_rsa -W %h:%p ec2-user@52.10.124.182" ec2-user@10.197.0.11 -i ~/.ssh/lyas_id_rsa
 ssh -o ProxyCommand="ssh -i ~/.ssh/lyas_id_rsa -W %h:%p ec2-user@52.10.124.182" ec2-user@10.197.0.4 -i ~/.ssh/lyas_id_rsa
 ssh -o ProxyCommand="ssh -i ~/.ssh/lyas_id_rsa -W %h:%p ec2-user@52.10.124.182" ec2-user@10.197.0.36 -i ~/.ssh/lyas_id_rsa
