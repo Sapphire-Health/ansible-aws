@@ -1,7 +1,9 @@
 ---
   - name: Get EC2 instance info
     hosts: all
-    connection: local
+    #connection: local
+    vars_files:
+      - ../vars/default.yml
     gather_facts: false
     tasks:
       - name: Gather EC2 instance info

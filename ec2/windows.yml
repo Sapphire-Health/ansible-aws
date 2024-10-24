@@ -1,10 +1,6 @@
 ---
   - name: Get storage info
     hosts: all
-    vars_files:
-      - ../vars/windows.yml
-    #connection: local
-    #gather_facts: true
     tasks:
       - name: Check if var file exists for host
         ansible.builtin.stat:

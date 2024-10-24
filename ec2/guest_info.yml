@@ -1,0 +1,5 @@
+- name: Wait for connection to be available
+  hosts: all
+  tasks:
+    - name: Wait for connection
+      wait_for_connection:
