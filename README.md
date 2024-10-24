@@ -5,6 +5,8 @@
 ansible-galaxy collection install -r collections/requirements.yml
 ansible-galaxy role install -r roles/requirements.yml
 pip3 install botocore boto3
+curl "https://s3.amazonaws.com/session-manager-downloads/plugin/latest/ubuntu_64bit/session-manager-plugin.deb" -o "session-manager-plugin.deb"
+sudo dpkg -i session-manager-plugin.deb
 ```
 
 ## Define environment variables
@@ -20,18 +22,24 @@ ansible-inventory -i inventory.aws_ec2.yml --list --yaml
 
 ## Ping Linux Hosts to Check Connectivity
 ```
-ansible -m ping -e @vars/default.yml -i inventory.aws_ec2.yml --limit='!_Windows' all
+#without SSM
+ansible -m ping -e @vars/linux.yml -i inventory.aws_ec2.yml --limit='!_Windows' all
+#with SSM
+ansible -m ping -e @vars/ssm_linux.yml -i inventory.aws_ec2.yml --limit='!_Windows' all
 ```
 
 ## Ping Windows Hosts to Check Connectivity
 ```
 kinit admin@CRO.UTAH.EDU
+#without SSM
 ansible -m win_ping -e @vars/windows.yml -i inventory.aws_ec2.yml --limit='_Windows' all
+#with SSM
+ansible -m win_ping -e @vars/ssm_windows.yml -i inventory.aws_ec2.yml --limit='_Windows' all
 ```
 
 ## Provision Ansible host
 ```
-ansible-playbook -i inventory.aws_ec2.yml -e @vars/default.yml --limit=ansible01.* provision/rhel_ansible_vm.yml
+ansible-playbook -i inventory.aws_ec2.yml -e @vars/linux.yml --limit=ansible01.* provision/rhel_ansible_vm.yml
 ```
 
 ## Get Instance Info
