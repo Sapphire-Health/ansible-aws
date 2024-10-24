@@ -8,4 +8,4 @@ ansible_ssh_common_args: >-
   -o StrictHostKeyChecking=no
   -o UserKnownHostsFile=/dev/null
   -W %h:%p
-  -q {{ hostvars["ansible01.cro.utah.edu"]["tags"]["User"] }}@{{ hostvars["ansible01.cro.utah.edu"]["public_ip_address"] }}"
+  -q {{ hostvars["ansible01.sapphire.dev"]["tags"]["User"] }}@{{ hostvars["ansible01.sapphire.dev"]["public_ip_address"] }}"

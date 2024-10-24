@@ -31,7 +31,7 @@ ansible -m ping -i inventory.aws_ec2.yml --limit='!_Windows' all
 
 ## Ping Windows Hosts to Check Connectivity
 ```
-kinit admin@CRO.UTAH.EDU
+kinit admin@sapphire.dev
 #without SSM
 ansible -m win_ping -e @vars/windows.yml -i inventory.aws_ec2.yml --limit='_Windows' all
 #with SSM

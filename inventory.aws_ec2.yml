@@ -5,7 +5,7 @@ regions:
   - us-west-1
   - us-west-2
 hostnames:
-  - name: 'cro.utah.edu'
+  - name: 'sapphire.dev'
     separator: '.'
     prefix: tag:Name
 keyed_groups:
