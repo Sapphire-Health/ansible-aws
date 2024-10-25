@@ -1,0 +1,6 @@
+---
+  - name: Provision Linux hosts
+    hosts: all
+    tasks:
+      - name: Provision Storage
+        ansible.builtin.include_tasks: storage/linux.yml

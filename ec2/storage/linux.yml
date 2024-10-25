@@ -46,25 +46,6 @@
         ansible.builtin.debug:
           msg: "{{ vol_name_to_path }}"
         delegate_to: localhost
-      # - name: Get stats of a file
-      #   ansible.builtin.stat:
-      #     path: "{{ item.value }}"
-      #   register: statdisklinks
-      #   become: yes
-      #   loop: "{{ lookup('dict', vol_name_to_path) }}"
-      # - name: Get volume name to id mapping
-      #   ansible.builtin.debug:
-      #     msg: "{{ statdisklinks }}"
-      #   delegate_to: localhost
-      # - name: Get volume name to disk mapping
-      #   ansible.builtin.set_fact:
-      #     vol_name_to_disk: "{{ vol_name_to_disk | default({}) | combine({item.item.key: item.stat.lnk_source}) }}"
-      #   delegate_to: localhost
-      #   loop: "{{ statdisklinks.results }}"
-      # - name: Get volume name to disk mapping
-      #   ansible.builtin.debug:
-      #     msg: "{{ vol_name_to_disk }}"
-      #   delegate_to: localhost
       - name: Get storage pools to path list mapping
         ansible.builtin.set_fact:
           #sp_path_mapping: "{{ sp_path_mapping | default({}) | combine({storage_pool.name: pathlist}) }}"
@@ -101,21 +82,3 @@
           name: linux-system-roles.storage
         vars:
           ansible_become: yes
-      # - name: Update storage_pools fact with storage disk paths
-      #   ansible.utils.update_fact:
-      #     storage_pool
-      #   vars:
-      #     storage_pools: []
-      #   loop: "{{ storage_pools }}"
-      #   loop_control:
-      #     loop_var: storage_pool
-      #     index_var: storage_pool_index
-      # - name: Install package with Yum
-      #   ansible.builtin.dnf:
-      #     name: amazon-ec2-utils
-      #     use_backend: dnf4
-      #     state: present
-      # - name: Show host facts
-      #   ansible.builtin.debug:
-      #     var: hostvars[inventory_hostname]
-      #   delegate_to: localhost

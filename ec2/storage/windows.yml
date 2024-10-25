@@ -1,0 +1,100 @@
+---
+  - name: Get storage info
+    hosts: all
+    tasks:
+      - name: Show EC2 volume info
+        ansible.builtin.debug:
+          msg: "{{ inventory_hostname_short }}"
+        delegate_to: localhost
+        vars:
+          ansible_connection: local
+      - name: Get EC2 instance info
+        amazon.aws.ec2_instance_info:
+          filters:
+            "tag:Name": "{{ inventory_hostname_short }}"
+            instance-state-name: ["running"]
+          region: "{{ hostvars[inventory_hostname].placement.region }}"
+        register: ec2_instance
+        delegate_to: localhost
+        vars:
+          ansible_connection: local
+      - name: Show EC2 instance info
+        ansible.builtin.debug:
+          msg: "{{ ec2_instance.instances[0].instance_id }}"
+        delegate_to: localhost
+        vars:
+          ansible_connection: local
+      - name: Make sure one instance was returned
+        ansible.builtin.fail:
+          msg: "No instance found for {{ inventory_hostname_short }}"
+        when: ec2_instance.instances | length == 0 or ec2_instance.instances | length > 1
+        delegate_to: localhost
+        vars:
+          ansible_connection: local
+      - name: Gather EC2 volume info
+        amazon.aws.ec2_vol_info:
+          filters:
+            attachment.instance_id: "{{ ec2_instance.instances[0].instance_id }}"
+          region: "{{ hostvars[inventory_hostname].placement.region }}"
+        register: ec2_vol_info
+        delegate_to: localhost
+        vars:
+          ansible_connection: local
+      - name: Get volume name to path
+        ansible.builtin.set_fact:
+          vol_name_to_id: "{{ vol_name_to_id | default({}) | combine({item.tags.ansible_key: vol_name}) }}"
+        vars:
+          vol_name: "{{ item.id|replace('-', '') }}"
+          ansible_connection: local
+        delegate_to: localhost
+        when: item.tags
+        loop: "{{ ec2_vol_info.volumes }}"
+      - name: Show vol_name_to_id
+        ansible.builtin.debug:
+          msg: "{{ vol_name_to_id }}"
+        delegate_to: localhost
+        vars:
+          ansible_connection: local
+      - name: Get disk facts
+        community.windows.win_disk_facts:
+        register: windows_disks
+      - name: Get volume id to disk id
+        ansible.builtin.set_fact:
+          vol_id_to_disk_id: "{{ vol_id_to_disk_id | default({}) | combine({vol_name[0]: item.number|int}) }}"
+        vars:
+          vol_name: "{{ item.serial_number | split('_') }}"
+          ansible_connection: local
+        delegate_to: localhost
+        #when: item.partition_count == 0
+        loop: "{{ windows_disks.ansible_facts.ansible_disks }}"
+      - name: Show vol_id_to_disk_id
+        ansible.builtin.debug:
+          msg: "{{ vol_id_to_disk_id }}"
+        delegate_to: localhost
+        vars:
+          ansible_connection: local
+      - name: Show disk information
+        ansible.builtin.debug:
+          msg: "{{ item.key }} - {{ item.value }}"
+        loop: "{{ volumes | dict2items }}"
+        delegate_to: localhost
+        vars:
+          ansible_connection: local
+      - name: Initialize disks
+        community.windows.win_initialize_disk :
+          disk_number: "{{ vol_id_to_disk_id[vol_name_to_id[item.key]] }}"
+          style: gpt
+        loop: "{{ volumes | dict2items }}"
+      - name: Partition disks
+        community.windows.win_partition:
+          drive_letter: "{{ item.value.letter }}"
+          disk_number: "{{ vol_id_to_disk_id[vol_name_to_id[item.key]] }}"
+          partition_size: -1
+          gpt_type: "basic_data"
+        loop: "{{ volumes | dict2items }}"
+      - name: Format disks
+        community.windows.win_format:
+          drive_letter: "{{ item.value.letter }}"
+          new_label: "{{ item.key }}"
+          file_system: ntfs
+        loop: "{{ volumes | dict2items }}"
