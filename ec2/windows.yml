@@ -4,3 +4,13 @@
     tasks:
       - name: Provision Storage
         ansible.builtin.include_tasks: storage/windows.yml
+      - name: Install IIS Web-Server with sub features and management tools
+        ansible.windows.win_feature:
+          name: Web-Server
+          state: present
+          include_sub_features: true
+          include_management_tools: true
+        register: win_feature
+      - name: Reboot if installing Web-Server feature requires it
+        ansible.windows.win_reboot:
+        when: win_feature.reboot_required
