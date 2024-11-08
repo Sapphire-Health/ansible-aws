@@ -5,9 +5,10 @@ regions:
   - us-west-1
   - us-west-2
 hostnames:
-  - name: 'sapphire.dev'
-    separator: '.'
-    prefix: tag:Name
+  # - name: 'sapphire.dev'
+  #   separator: '.'
+  #   prefix: tag:Name
+  - name: tag:Name
 keyed_groups:
   - key: state.name
   - key: platform_details

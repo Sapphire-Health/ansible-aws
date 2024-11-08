@@ -40,7 +40,7 @@ ansible -m win_ping -i inventory.aws_ec2.yml --limit='_Windows' all
 
 ## Provision Ansible host
 ```
-ansible-playbook -i inventory.aws_ec2.yml -e @vars/linux.yml --limit=ansible01.* provision/rhel_ansible_vm.yml
+ansible-playbook -i inventory.aws_ec2.yml --limit=ansible01* provision/rhel_ansible_vm.yml
 ```
 
 ## Get Instance Info
@@ -66,9 +66,9 @@ ansible-playbook -e region=us-east-2 transit_gateway/transit_gateway_info.yml
 ## Provision ODB Storage
 ```
 #without SSM
-ansible-playbook -i inventory.aws_ec2.yml -e @vars/linux.yml --limit=tstodb.*,prdodb.* ec2/linux.yml
+ansible-playbook -i inventory.aws_ec2.yml -e @vars/linux.yml --limit=tstodb*,prdodb* ec2/linux.yml
 #with SSM
-ansible-playbook -i inventory.aws_ec2.yml --limit=tstodb.*,prdodb.* ec2/linux.yml
+ansible-playbook -i inventory.aws_ec2.yml --limit=tstodb*,prdodb* ec2/linux.yml
 ```
 
 ## Provision Windows Storage
@@ -100,4 +100,6 @@ ssh -o ProxyCommand="ssh -i ~/.ssh/lyas_id_rsa -W %h:%p ec2-user@52.10.124.182" 
 ## SSM Examples
 ```
 aws ssm start-session --target i-064ba27a514ed5130 --region us-west-2
+
+ssh -o ProxyCommand="aws ssm start-session --region us-west-2 --target $(aws ec2 describe-instances --region us-west-2 --filter "Name=tag:Name,Values=ansible01" --query "Reservations[].Instances[?State.Name == 'running'].InstanceId[]" --output text) --document-name AWS-StartSSHSession --parameters portNumber=22" lyasspiehler@ansible01 -i ~/.ssh/lyas_id_rsa
 ```
