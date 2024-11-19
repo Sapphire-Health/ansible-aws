@@ -11,6 +11,7 @@ storage_layout:
     - name: shared
       size: "80g"
       raid_level: striped
+      #verify striping with this command "lvs -o+lv_layout,stripes"
       mount_point: "/epic"
       fs_type: xfs
       state: present
