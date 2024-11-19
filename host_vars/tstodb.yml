@@ -1,21 +1,25 @@
+storage_safe_mode: true # set to false when resizing PVs
 storage_layout:
-- name: app
+- name: epic
+  grow_to_fill: false # set to true when resizing PVs
+  type: lvm
   disks:
     - disk1
     - disk2
+    - disk3
   volumes:
     - name: shared
-      size: "50g"
-      mount_point: "/mnt/app/shared"
-      #fs_type: xfs
+      size: "80g"
+      raid_level: striped
+      mount_point: "/epic"
+      fs_type: xfs
       state: present
 - name: db
   disks:
-    - disk3
-    #- disk4
+    - disk4
   volumes:
     - name: users
-      size: "30g"
-      fs_type: ext4
+      size: "20g"
+      fs_type: xfs
       state: present
       mount_point: "/mnt/app/users"

@@ -43,15 +43,10 @@
     msg: "{{ vol_name_to_path }}"
   delegate_to: localhost
 - name: Get storage pools to path list mapping
-  ansible.builtin.set_fact:
-    #sp_path_mapping: "{{ sp_path_mapping | default({}) | combine({storage_pool.name: pathlist}) }}"
-    storage_pools: "{{ storage_pools + pool}}"
-  vars:
-    storage_pools: []
-    pool:
-      - name: "{{ storage_pool.name }}"
-        volumes: "{{ storage_pool.volumes }}"
-        disks: >-
+  ansible.utils.update_fact:
+    updates:
+      - path: "storage_layout[{{ storage_pool_index }}].disks"
+        value: >-
           {%- set disks = [] -%}
             {%- for disk in storage_pool.disks -%}
             {%- set disks = disks.append(vol_name_to_path[disk]) -%}
@@ -62,6 +57,15 @@
   loop_control:
     loop_var: storage_pool
     index_var: storage_pool_index
+  register: updated
+# - name: Show storage layout
+#   ansible.builtin.debug:
+#     msg: "{{ updated.results[-1].storage_layout }}"
+#   delegate_to: localhost
+- name: Set storage pools to match modified storage layout from vars
+  ansible.builtin.set_fact:
+    storage_pools: "{{ updated.results[-1].storage_layout }}"
+  delegate_to: localhost
 - name: Show storage layout
   ansible.builtin.debug:
     msg: "{{ storage_pools }}"
