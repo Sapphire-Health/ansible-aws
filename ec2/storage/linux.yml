@@ -71,15 +71,15 @@
   ansible.builtin.debug:
     msg: "{{ storage_pools }}"
   delegate_to: localhost
-# - name: Install dependencies
-#   ansible.builtin.dnf:
-#     name: "{{ item }}"
-#     state: latest
-#   loop:
-#     - lvm2
-#   become: true
-# - name: Provision storage
-#   ansible.builtin.include_role:
-#     name: linux-system-roles.storage
-#   vars:
-#     ansible_become: yes
+- name: Install dependencies
+  ansible.builtin.dnf:
+    name: "{{ item }}"
+    state: latest
+  loop:
+    - lvm2
+  become: true
+- name: Provision storage
+  ansible.builtin.include_role:
+    name: linux-system-roles.storage
+  vars:
+    ansible_become: yes
